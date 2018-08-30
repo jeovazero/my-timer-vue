@@ -37,7 +37,7 @@ Vue.component('boxtimer', {
     props: ['ctn', 'lbl'],
     template: `<div class="bt">
                 <div class="ctn"> {{ ctn }} </div>
-                <div class="sub"> {{ lbl }} </div>
+                <div class="lbl"> {{ lbl }} </div>
             </div>`
 });
 
@@ -53,10 +53,13 @@ Vue.component('relogin', {
         }
     },
     template: `
-        <div class="container">
+        <div class="relogin">
             <boxtimer :ctn="D.days" lbl="dias"></boxtimer>
+            <div class="spt"></div>
             <boxtimer :ctn="D.hours" lbl="horas"></boxtimer>
+            <div class="spt"></div>
             <boxtimer :ctn="D.minutes" lbl="minutos"></boxtimer>
+            <div class="spt"></div>
             <boxtimer :ctn="D.seconds" lbl="segundos"></boxtimer>
         </div>
     `,

@@ -12,13 +12,23 @@
 </head>
 
 <body>
-  <div>
+  <div id="bar">
     <div class="main"> Você aluno da ufpi!</div>
-    <div class="sub"> Achou que o período estava acabando?</div>
-    <div class="sub"> Achou errado, otário!</div>
+    <div class="wrapperSub">
+    <div class="submain">
+      <div class="sub"> Achou que o período estava acabando?</div>
+      <div class="sub"> Achou errado, otário!</div>
+    </div>
   </div>
-  <div id="root">
-    <relogin enddate="Dec 12, 2018 23:59:59"></relogin>
+  </div>
+  <div id="wrapperTimer"> 
+    <div class="faltam">Faltam</div>
+    <div id="root">
+      <relogin enddate="Dec 12, 2018 23:59:59"></relogin>
+    </div>
+  </div>
+  <div id="by">
+    by @jeovazero
   </div>
 </body>
 <script src="vue.min.js"></script>
