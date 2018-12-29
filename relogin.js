@@ -42,7 +42,7 @@ Vue.component('boxtimer', {
 });
 
 Vue.component('relogin', {
-    props: ['enddate'],
+    props: ['enddate', 'onfinish'],
     data: function(){
         return {
             S: Date.now(),
@@ -54,13 +54,18 @@ Vue.component('relogin', {
     },
     template: `
         <div class="relogin">
-            <boxtimer :ctn="D.days" lbl="dias"></boxtimer>
-            <div class="spt"></div>
-            <boxtimer :ctn="D.hours" lbl="horas"></boxtimer>
-            <div class="spt"></div>
-            <boxtimer :ctn="D.minutes" lbl="minutos"></boxtimer>
-            <div class="spt"></div>
-            <boxtimer :ctn="D.seconds" lbl="segundos"></boxtimer>
+            <div v-if="F" class="timer">
+                <boxtimer :ctn="D.days" lbl="dias"></boxtimer>
+                <div class="spt"></div>
+                <boxtimer :ctn="D.hours" lbl="horas"></boxtimer>
+                <div class="spt"></div>
+                <boxtimer :ctn="D.minutes" lbl="minutos"></boxtimer>
+                <div class="spt"></div>
+                <boxtimer :ctn="D.seconds" lbl="segundos"></boxtimer>
+            </div>
+            <div class="new-year" v-else>
+                <span>Feliz Ano Novo!!!<br> 🎊 ✨ 🎉</span>
+            </div>
         </div>
     `,
     mounted: function(){
@@ -76,8 +81,13 @@ Vue.component('relogin', {
                 this.S = Date.now();
                 if(!this.updateD()){
                     clearInterval(this.U);
+                    this.F = false;
+                    this.onfinish && this.onfinish();
                 }
             },1000);
+        }else{
+            this.onfinish && this.onfinish();
+            this.F = false;
         }
 
     },
@@ -85,11 +95,7 @@ Vue.component('relogin', {
         updateD: function(){
             let diff = this.E - this.S;
             this.D = millito(Math.max(diff, 0));
-            return (diff <= 0) ? this.final() : true;
-        },
-        final: function(){
-            this.F = false;
-            return false;
+            return (diff <= 0) ? false : true;
         }
     }
 });
@@ -105,5 +111,13 @@ const conversion = (date) => {
 }
 
 const App = new Vue({
-    el: '#root'
+    el: '#root',
+    data: {
+        finish: true
+    },
+    methods: {
+        hideTitle: function(){
+            this.finish = false;
+        }
+    }
 });

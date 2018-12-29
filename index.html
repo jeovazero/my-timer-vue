@@ -26,9 +26,9 @@
       </div>
     </div>
     <div id="wrapperTimer">
-      <div class="faltam">Faltam</div>
       <div id="root">
-        <relogin enddate="Dec 31, 2018 23:59:59"></relogin>
+        <div v-show="finish" class="faltam">Faltam</div>
+        <relogin enddate="Dec 31, 2018 23:59:59" :onfinish="hideTitle"></relogin>
       </div>
     </div>
     <div id="by">
