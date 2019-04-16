@@ -1,30 +1,30 @@
-const URL_GOOGLE ="https://script.google.com/macros/s/AKfycbyd5AcbAnWi2Yn0xhFRbyzS4qMq1VucMVgVvhul5XqS9HkAyJY/exec?tz=America/Fortaleza";
+const URL_GOOGLE_SCRIPT ="https://script.google.com/macros/s/AKfycbyd5AcbAnWi2Yn0xhFRbyzS4qMq1VucMVgVvhul5XqS9HkAyJY/exec?tz=America/Fortaleza"
 
-const SC = 1000;
-const MN = 60 * SC;
-const HR = 60 * MN;
-const DY = 24 * HR;
+const secondsInMilli = 1000 // 1000 milliseconds
+const minutesInMilli = 60 * secondsInMilli
+const hoursInMilli = 60 * minutesInMilli
+const daysInMilli = 24 * hoursInMilli
 
-const FD = (len, number) => (new Array(len).fill('0').join('') + number).slice(-len);
-const F2 = (number) => FD(2, number);
+const fillNumber = (len, number) => (new Array(len).fill('0').join('') + number).slice(-len)
+const fillNumberWidth2 = (number) => fillNumber(2, number)
 
-const millito = (ms) => {
-    const   days    = Math.trunc(ms / DY),
-            hours   = F2(Math.trunc((ms % DY ) / HR)),
-            minutes = F2(Math.trunc((ms % HR) / MN)),
-            seconds = F2(Math.trunc((ms % MN) / SC));
+const decodeMilliseconds = (ms) => {
+    const days = Math.trunc(ms / daysInMilli)
+    const hours = fillNumberWidth2(Math.trunc((ms % daysInMilli ) / hoursInMilli))
+    const minutes = fillNumberWidth2(Math.trunc((ms % hoursInMilli) / minutesInMilli))
+    const seconds = fillNumberWidth2(Math.trunc((ms % minutesInMilli) / secondsInMilli))
     return {
-        days,
-        hours,
-        minutes,
-        seconds
+      days,
+      hours,
+      minutes,
+      seconds
     }
 }
 
-async function getTime(){
+async function getTimeJson(){
     try{
-        let response = await fetch(URL_GOOGLE);
-        let json = await response.json();
+        const response = await fetch(URL_GOOGLE_SCRIPT);
+        const json = await response.json();
         console.log(json);
         return json;
     }catch(e){
@@ -34,10 +34,10 @@ async function getTime(){
 };
 
 Vue.component('boxtimer', {
-    props: ['ctn', 'lbl'],
+    props: ['number', 'label'],
     template: `<div class="bt">
-                <div class="ctn"> {{ ctn }} </div>
-                <div class="lbl"> {{ lbl }} </div>
+                <div class="ctn"> {{ number }} </div>
+                <div class="lbl"> {{ label }} </div>
             </div>`
 });
 
@@ -45,23 +45,23 @@ Vue.component('relogin', {
     props: ['enddate', 'onfinish'],
     data: function(){
         return {
-            S: Date.now(),
-            E: Date.now(),
-            D: millito(new Date().getTime()),
-            U: null,
-            F: true
+            startDate: Date.now(),
+            endDate: Date.now(),
+            diffDate: decodeMilliseconds(new Date().getTime()),
+            counterHandler: null,
+            isRunCounter: true
         }
     },
     template: `
         <div class="relogin">
-            <div v-if="F" class="timer">
-                <boxtimer :ctn="D.days" lbl="dias"></boxtimer>
+            <div v-if="isRunCounter" class="timer">
+                <boxtimer :number="diffDate.days" label="dias"></boxtimer>
                 <div class="spt"></div>
-                <boxtimer :ctn="D.hours" lbl="horas"></boxtimer>
+                <boxtimer :number="diffDate.hours" label="horas"></boxtimer>
                 <div class="spt"></div>
-                <boxtimer :ctn="D.minutes" lbl="minutos"></boxtimer>
+                <boxtimer :number="diffDate.minutes" label="minutos"></boxtimer>
                 <div class="spt"></div>
-                <boxtimer :ctn="D.seconds" lbl="segundos"></boxtimer>
+                <boxtimer :number="diffDate.seconds" label="segundos"></boxtimer>
             </div>
             <div class="new-year" v-else>
                 <span>Feliz Ano Novo!!!<br> 🎊 ✨ 🎉</span>
@@ -69,46 +69,39 @@ Vue.component('relogin', {
         </div>
     `,
     mounted: function(){
-        this.S = Date.now();
-        this.E = new Date(this.enddate);
-        getTime().then( o => {
-            this.S = new Date(o.fulldate)
+        this.startDate = Date.now()
+        this.endDate = new Date(this.enddate)
+
+        // Updating the startDate with google date
+        getTimeJson().then( o => {
+            this.startDate = new Date(o.fulldate)
         }).catch(e => {
-            console.log(e);
+            console.log(e)
         });
-        if(this.updateD()){
-            this.U = setInterval( () => {
-                this.S = Date.now();
-                if(!this.updateD()){
-                    clearInterval(this.U);
-                    this.F = false;
+
+        if(this.updateDiffDate()){
+            this.counterHandler = setInterval( () => {
+                this.startDate = Date.now()
+                if(!this.updateDiffDate()){
+                    clearInterval(this.counterHandler);
+                    this.isRunCounter = false;
                     this.onfinish && this.onfinish();
                 }
             },1000);
         }else{
             this.onfinish && this.onfinish();
-            this.F = false;
+            this.isRunCounter = false;
         }
 
     },
     methods: {
-        updateD: function(){
-            let diff = this.E - this.S;
-            this.D = millito(Math.max(diff, 0));
+        updateDiffDate: function(){
+            let diff = this.endDate - this.startDate;
+            this.diffDate = decodeMilliseconds(Math.max(diff, 0));
             return (diff <= 0) ? false : true;
         }
     }
 });
-
-const conversion = (date) => {
-    const D = new Date();
-    return {
-        seconds: D.getSeconds(),
-        minutes: D.getMinutes(),
-        hours: D.getHours(),
-        days: 0
-    }
-}
 
 const App = new Vue({
     el: '#root',
